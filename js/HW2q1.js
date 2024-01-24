@@ -1,8 +1,7 @@
 /***********
- * sphereOfStarburstsA.js
- * Starbursts placed on a sphere
- * M. Laszlo
- * September 2019
+ * Homework 2 q1
+ * Starbursts placed on a Torus
+ * Eduardo Castro-Puello
  ***********/
 
 let camera, scene, renderer;

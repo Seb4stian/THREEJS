@@ -1,27 +1,28 @@
 /***********
- * someGeometries.js
- * Some three.js geometries
- * M. Laszlo
- * September 2019
+ * HW 2 Question 2 - pyramid of tori
+ * Ed Castro-Puello
+ * Jan 2024
  ***********/
 
 var camera, scene, renderer;
 var cameraControls;
-var gui, controls;
+var gui;
 var currentMat, wireframeMat, currentMesh;
 var currentObjectName;
 var clock = new THREE.Clock();
+let root = null;
 
 
-function Controls() {
-    this.type = 'Sphere';
-    this.wireframe = false;
+let controls = new function() {
+    this.NumTorus = 14
+	this.BigRadius = 15;
+	this.SmallRadius = 0.4;
+    this.Go = update;
 }
 
 function createScene() {
-    currentMat = new THREE.MeshLambertMaterial({color: "blue", flatShading: true}); 
-    wireframeMat = new THREE.MeshBasicMaterial({color: 'red', wireframe: true, wireframeLinewidth: 2});
-    updateObject('Sphere');
+ 
+    update(14, 15, 1);
     var light = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
     light.position.set(0, 0, 40);
     var light2 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
@@ -30,6 +31,8 @@ function createScene() {
     scene.add(light);
     scene.add(light2);
     scene.add(ambientLight);
+	let axes = new THREE.AxesHelper(10);
+	scene.add(axes);
 }
 
 
@@ -60,54 +63,48 @@ function init() {
     renderer.setClearColor(0x000000, 1.0);
 
     camera = new THREE.PerspectiveCamera( 40, canvasRatio, 1, 1000);
-    camera.position.set(0, 0, 40);
+    camera.position.set(0, 20, 60);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
 
     initGui();
 }
-
-function updateObject(objectType) {
-    var geom;     
-    if (currentMesh)
-        scene.remove(currentMesh);
-    switch (objectType) {
-        case 'Sphere':  geom = new THREE.SphereGeometry(10, 24, 24);
-                        break;
-        case 'Torus':   geom = new THREE.TorusGeometry(10, 3, 24, 36);
-                        break;
-        case 'Octahedron': geom = new THREE.OctahedronGeometry(8);
-                        break;
-        case 'Knot':    geom = new THREE.TorusKnotGeometry(5, 2);
-                        break;
-        case 'Icosahedron': geom = new THREE.IcosahedronGeometry(10);
-                        break;
-        case 'Cube': geom = new THREE.BoxGeometry(10, 10, 10);
-                        break;
-        case 'Dodecahedron': geom = new THREE.DodecahedronGeometry(10);
-                        break;
-        case 'Cylinder': geom = new THREE.CylinderGeometry(5, 5, 20, 16);
-                        break;
-    }
-    if (geom) {
-        currentMesh = new THREE.Object3D;
-        currentMesh.add(new THREE.Mesh(geom, currentMat));
-        if (controls.wireframe)
-            currentMesh.add(new THREE.Mesh(geom, wireframeMat));
-        scene.add(currentMesh);
-        currentObjectName = objectType;
-    }
+function PiramideOnTorus(NumTorus, BigRadius, SmallRadius){
+	let root = new THREE.Object3D();
+	for (let i = 0; i < NumTorus; i++){
+		let innerColor = getRandomColor();
+		geom = new THREE.TorusGeometry(BigRadius-((BigRadius-SmallRadius)/NumTorus)*i, SmallRadius, 24, 36);
+		currentMat = new THREE.MeshLambertMaterial({color: innerColor, flatShading: true});
+		Torus = new THREE.Mesh(geom, currentMat);
+		Torus.position.z = -i;
+		root.add(Torus);
+		root.rotation.x = Math.PI / 2;
+	}
+	geom = new THREE.SphereGeometry(SmallRadius, 24, 24);
+	let innerColor = getRandomColor();
+	currentMat = new THREE.MeshLambertMaterial({color: innerColor, flatShading: true});
+	Sphere = new THREE.Mesh(geom, currentMat)
+	Sphere.position.z = -NumTorus;
+	root.add(Sphere);
+	return root;
+}
+function update() {
+	let NumTorus = controls.NumTorus;
+    let BigRadius = controls.BigRadius;
+	let SmallRadius = controls.SmallRadius;
+    if (root)
+        scene.remove(root);
+    root = PiramideOnTorus(NumTorus, BigRadius, SmallRadius);
+    scene.add(root);
 }
 
 function initGui() {
-    gui = new dat.GUI();
-    controls = new Controls();
-    var objectTypes =  ['Sphere', 'Torus', 'Cylinder', 'Cube', 'Octahedron', 'Icosahedron', 'Dodecahedron', 'Knot']
-    var typeItem = gui.add(controls, 'type', objectTypes);
-    typeItem.onChange(updateObject);
-    var isWireframe = gui.add(controls, 'wireframe');
-    isWireframe.onChange(function(value) {updateObject(currentObjectName)});
-    currentObjectName = 'Sphere';
+
+	let gui = new dat.GUI();
+    gui.add(controls, 'NumTorus', 5, 20).step(1).name('Num. Torus');
+	gui.add(controls, 'BigRadius', 4, 20).name('Torus Big radius');
+    gui.add(controls, 'SmallRadius',0.1,1).name('Torus Small radius');
+    gui.add(controls, 'Go');
 }
 
 

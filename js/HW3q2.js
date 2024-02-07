@@ -1,7 +1,7 @@
 /***********
- * HW 3 Question 2 - Regular Polygon
+ * HW 3 Question 2 - Helix
  * Ed Castro-Puello
- * Jan 2024
+ * Feb 2024
  ***********/
 
 let camera, scene, renderer;

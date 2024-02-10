@@ -7,14 +7,13 @@
 let camera, scene, renderer;
 let cameraControls;
 let clock = new THREE.Clock();
-let n = 49;
-let radius = 2;
-let angle = Math.PI / 4;
-let dist = 0.5;
-const geometry = new THREE.SphereGeometry( 1, 12, 12 ); 
-const material = new THREE.MeshLambertMaterial( { color: 'blue' } ); 
-const sphere = new THREE.Mesh( geometry, material );
-let Helix;
+let nbrBoxes = 100; 
+let minSide = 5; 
+let maxSide = 20; 
+let minHeight = 5; 
+let maxHeight = 60;
+let boxes;
+
 
 function createScene() {
     let axes = new THREE.AxesHelper(10);
@@ -41,7 +40,7 @@ function createScene() {
     light6.position.set(-220, 0, 0);
 	scene.add(light6);
 	
-	let boxes = randomBoxes(100, 5, 20, 5, 60); 
+	boxes = randomBoxes(nbrBoxes, minSide, maxSide, minHeight, maxHeight); 
 	scene.add(boxes);
 	
     //scene.add(axes);
@@ -124,30 +123,33 @@ function addToDOM() {
 	container.appendChild( renderer.domElement );
 }
 var controls = new function() {
-    this.n = 49;
-    this.radius = 2;
-	this.angle = Math.PI / 4;
-	this.dist = 0.5;
+
+    this.nbrBoxes = 100;
+    this.minSide = 5;
+	this.maxSide = 20;
+	this.minHeight = 5;
+	this.maxHeight = 60;
     //this.color = '#0000FF';
 }
 
 function initGui() {
     var gui = new dat.GUI();
-    gui.add(controls, 'n', 0, 60).step(1).onChange(update);
-    gui.add(controls, 'radius', 1, 10).step(1).onChange(update);
-	gui.add(controls, 'angle', 0, 2*Math.PI).step(Math.PI / 4).onChange(update);
-	gui.add(controls, 'dist', 0.5, 5).step(0.5).onChange(update);
+    gui.add(controls, 'nbrBoxes', 1, 200).step(1).onChange(update);
+    gui.add(controls, 'minSide', 1, 10).step(1).onChange(update);
+	gui.add(controls, 'maxSide', 10, 50).step(1).onChange(update);
+	gui.add(controls, 'minHeight', 1, 10).step(1).onChange(update);
+	gui.add(controls, 'maxHeight', 10, 100).step(1).onChange(update);
     //gui.addColor(controls, 'color').onChange(update);
 }
 function update() {
-    scene.remove(Helix);
-	Helix = createHelix(sphere, controls.n, controls.radius, controls.angle, controls.dist)
-    scene.add(Helix);
+    scene.remove(boxes);
+	boxes = randomBoxes(controls.nbrBoxes, controls.minSide, controls.maxSide, controls.minHeight, controls.maxHeight); 
+	scene.add(boxes);
 }
 
 init();
 createScene();
-//initGui();
+initGui();
 addToDOM();
 render();
 animate();

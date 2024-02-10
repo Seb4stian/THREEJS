@@ -33,10 +33,18 @@ function createScene() {
     light4.position.set(0, -100, 0);
 	scene.add(light4);
 	
+	var light5 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light5.position.set(220, 0, 0);
+	scene.add(light5);
+	
+	var light6 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light6.position.set(-220, 0, 0);
+	scene.add(light6);
+	
 	let boxes = randomBoxes(100, 5, 20, 5, 60); 
 	scene.add(boxes);
 	
-    scene.add(axes);
+    //scene.add(axes);
 }
 
 function randomBoxes(nbrBoxes, minSide, maxSide, minHeight, maxHeight){
@@ -139,7 +147,7 @@ function update() {
 
 init();
 createScene();
-initGui();
+//initGui();
 addToDOM();
 render();
 animate();

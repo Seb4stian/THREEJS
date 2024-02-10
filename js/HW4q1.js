@@ -1,5 +1,5 @@
 /***********
- * HW 3 Question 2 - Helix
+ * HW 4 Question 1 - Random Boxes
  * Ed Castro-Puello
  * Feb 2024
  ***********/
@@ -19,27 +19,58 @@ let Helix;
 function createScene() {
     let axes = new THREE.AxesHelper(10);
 	var light = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
-    light.position.set(0, 0, 40);
+    light.position.set(0, 0, 220);
 	scene.add(light);
 	var light2 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
-    light2.position.set(0, 0, -40);
-	scene.add(light2); 
-	 
-	//scene.add( sphere );
-	Helix = createHelix(sphere, n, radius, angle, dist);
-	scene.add(Helix);
+    light2.position.set(0, 0, -220);
+	scene.add(light2);
+
+	var light3 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light3.position.set(0, 100, 0);
+	scene.add(light3);
+	
+	var light4 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light4.position.set(0, -100, 0);
+	scene.add(light4);
+	
+	let boxes = randomBoxes(100, 5, 20, 5, 60); 
+	scene.add(boxes);
+	
     scene.add(axes);
 }
-function createHelix(object, n, radius, angle, dist) {
+
+function randomBoxes(nbrBoxes, minSide, maxSide, minHeight, maxHeight){
+	
 	let root = new THREE.Object3D();
-	for (let i = 0; i < n; i++) {
-		let clone = object.clone();
-		x = radius*Math.cos(i*angle);
-		y = radius*Math.sin(i*angle);
-		clone.position.set(x, y, i*dist);
-		root.add(clone);
+	let geom = new THREE.BoxGeometry(200, 0.4, 200);
+	let matArgs = {color: 'grey', transparent: true, opacity: 1};
+    let mat = new THREE.MeshLambertMaterial(matArgs);
+	root.add(new THREE.Mesh(geom, mat));
+	for (let i = 0; i < nbrBoxes; i++) {
+		let side = getRandomFloat(minSide, maxSide);
+		let height = getRandomFloat(minHeight, maxHeight);
+		let geomB = new THREE.BoxGeometry(side, height, side);
+		let matArgsB = {color: getRandomColor(0.8, 0.1, 0.8), transparent: true, opacity: 0.8};
+		let matB = new THREE.MeshLambertMaterial(matArgsB);
+		let boxB = new THREE.Mesh(geomB, matB);
+		let x = getRandomFloat(-100,100);
+		let y = getRandomFloat(-100,100);
+		if (x-side/2 < -100){
+			x = -100+side;
+		}
+		if (x+side/2 > 100){
+			x = 100-side;
+		}
+		if (y-side/2 < -100){
+			y = -100+side;
+		}
+		if (y+side/2 > 100){
+			y = 100-side;
+		}
+		boxB.position.set(x, height/2, y);
+		root.add(boxB);
 	}
-	return root;
+    return root;
 }
 
 function animate() {
@@ -69,7 +100,7 @@ function init() {
 	renderer.setClearColor(0x000000, 1.0);
 
 	camera = new THREE.PerspectiveCamera( 40, canvasRatio, 1, 1000);
-	camera.position.set(0, 0, 30);
+	camera.position.set(0, 100, 250);
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 	cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -112,5 +143,3 @@ initGui();
 addToDOM();
 render();
 animate();
-
-

@@ -3,7 +3,8 @@
  * Ed Castro-Puello
  * Feb 2024
  ***********/
-
+//import { GLTFLoader } from './js/GLTFLoader.js';
+//import GLTFLoader from 'three-gltf-loader';
 var camera, scene, renderer;
 var cameraControls;
 var gui;
@@ -21,28 +22,61 @@ let controls = new function() {
 
 function createScene() {
  
-    update(14, 15, 1);
-    var light = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
-    light.position.set(0, 0, 40);
-    var light2 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
-    light2.position.set(0, 0, -40);
-    var ambientLight = new THREE.AmbientLight(0x333333);
-    scene.add(light);
-    scene.add(light2);
-    scene.add(ambientLight);
-	let axes = new THREE.AxesHelper(10);
-	scene.add(axes);
+    let axes = new THREE.AxesHelper(10);
+	var light = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light.position.set(0, 0, 220);
+	scene.add(light);
+	var light2 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light2.position.set(0, 0, -220);
+	scene.add(light2);
+
+	var light3 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light3.position.set(0, 100, 0);
+	scene.add(light3);
 	
+	var light4 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light4.position.set(0, -100, 0);
+	scene.add(light4);
+	
+	var light5 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light5.position.set(220, 0, 0);
+	scene.add(light5);
+	
+	var light6 = new THREE.PointLight(0xFFFFFF, 1.0, 1000 );
+    light6.position.set(-220, 0, 0);
+	scene.add(light6);
+	
+	scene.add(axes);
+
+	/*
 	let NumTorus = controls.NumTorus;
     let BigRadius = controls.BigRadius;
 	let SmallRadius = controls.SmallRadius;
     if (root)
-        scene.remove(root);
-    root = PiramideOnTorus(NumTorus, BigRadius, SmallRadius);
+        scene.remove(root);*/
+    root = createFish(1000);
+	
     scene.add(root);
 	
 }
 
+function createFish(n) {
+	let root1 = new THREE.Object3D();
+	let color = new THREE.Color('#ff3232');
+    let opacity = 1.0
+    let matArgs = {color: color, transparent: true, opacity: opacity};
+    mat = new THREE.MeshLambertMaterial(matArgs);
+	for (let i = 0; i < n; i++){
+		let geom = new THREE.CylinderGeometry(1, 0.2, 0.5, 3);
+		let mesh = new THREE.Mesh(geom, mat);
+		mesh.rps = 0.5;
+		mesh.position.x = getRandomFloat(-100,100);
+		mesh.position.y = getRandomFloat(-100,100);
+		mesh.position.z = getRandomFloat(-100,100);
+		root1.add(mesh);
+	}
+	return root1;
+}
 
 function animate() {
     window.requestAnimationFrame(animate);
@@ -75,13 +109,13 @@ function init() {
     });
 	
     camera = new THREE.PerspectiveCamera( 40, canvasRatio, 1, 1000);
-    camera.position.set(0, 20, 60);
+    camera.position.set(0, 200, 60);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
 
     initGui();
 }
-
+/*
 function PiramideOnTorus(NumTorus, BigRadius, SmallRadius){
 	let root = new THREE.Object3D();
 	for (let i = 0; i < NumTorus; i++){
@@ -102,19 +136,19 @@ function PiramideOnTorus(NumTorus, BigRadius, SmallRadius){
 	root.add(Sphere);
 	root.rps = 0.05;
 	return root;
-}
+}*/
 function update2() {
 	let NumTorus = controls.NumTorus;
     let BigRadius = controls.BigRadius;
 	let SmallRadius = controls.SmallRadius;
-    if (root)
-        scene.remove(root);
-    root = PiramideOnTorus(NumTorus, BigRadius, SmallRadius);
-    scene.add(root);
+    //if (root)
+    //    scene.remove(root);
+    //root = PiramideOnTorus(NumTorus, BigRadius, SmallRadius);
+    //scene.add(root);
 }
 let t = 0;
 function update() {
-	let delta = clock.getDelta();
+	/*let delta = clock.getDelta();
 	t += delta;
 	t %= controls.NumTorus;
 	if (root){
@@ -127,7 +161,7 @@ function update() {
 		let deltaRotRadians = rpsToRadians(root.rps, delta);
 		root.rotation.y += deltaRotRadians;
 		root.rotation.y %= 2 * Math.PI;
-    }
+    }*/
 }
 
 function initGui() {

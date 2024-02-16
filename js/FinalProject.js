@@ -14,9 +14,8 @@ var clock = new THREE.Clock();
 let root = null;
 
 let controls = new function() {
-    this.NumTorus = 14
-	this.BigRadius = 15;
-	this.SmallRadius = 0.4;
+    this.NumFish = 1000;
+	this.FishRadius = 15;
     this.Go = update2;
 }
 
@@ -54,7 +53,7 @@ function createScene() {
 	let SmallRadius = controls.SmallRadius;
     if (root)
         scene.remove(root);*/
-    root = createFish(1000);
+    root = createFish(controls.NumFish);
 	
     scene.add(root);
 	
@@ -138,16 +137,50 @@ function PiramideOnTorus(NumTorus, BigRadius, SmallRadius){
 	return root;
 }*/
 function update2() {
-	let NumTorus = controls.NumTorus;
+	/*let NumTorus = controls.NumTorus;
     let BigRadius = controls.BigRadius;
-	let SmallRadius = controls.SmallRadius;
+	let SmallRadius = controls.SmallRadius;*/
     //if (root)
     //    scene.remove(root);
     //root = PiramideOnTorus(NumTorus, BigRadius, SmallRadius);
     //scene.add(root);
+	if (root)
+        scene.remove(root);
+    root = createFish(controls.NumFish);
+	
+    scene.add(root);
+}
+function getDistance(child,x,y,z){
+	a = child.position.x - x;
+	b = child.position.y - y;
+	c = child.position.z - z;
+	return Math.sqrt(a*a + b*b + c*c);
+}
+function GetCloseFishes(children, x, y, z){
+	const nearFishes = [];
+	if (root){
+		let children = root.children;
+		for (let i = 0; i < children.length; i++) {
+			 nearFishes.push(children[i]);
+		}
+    }
+	return nearFishes;
+}
+function align(nearFishes,x,y,z){
+	let n = nearFishes.length;
+	let avgX = x;
+	let avgY = y;
+	let avgZ = z;
+	for (let i = 0; i < n; i++) {
+		avgX += nearFishes[i].x;
+		avgY += nearFishes[i].y;
+		avgZ += nearFishes[i].z;
+	}
+	return [avgX, avgY, avgZ];
 }
 let t = 0;
 function update() {
+	
 	/*let delta = clock.getDelta();
 	t += delta;
 	t %= controls.NumTorus;
@@ -167,9 +200,8 @@ function update() {
 function initGui() {
 
 	let gui = new dat.GUI();
-    gui.add(controls, 'NumTorus', 5, 20).step(1).name('Num. Torus');
-	gui.add(controls, 'BigRadius', 4, 20).name('Torus Big radius');
-    gui.add(controls, 'SmallRadius',0.1,1).name('Torus Small radius');
+    gui.add(controls, 'NumFish', 100, 2000).step(100).name('Num. Fish');
+	gui.add(controls, 'FishRadius', 5, 50).step(5).name('Fish Radius');
     gui.add(controls, 'Go');
 }
 

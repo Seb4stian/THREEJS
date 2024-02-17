@@ -14,8 +14,8 @@ var clock = new THREE.Clock();
 let root = null;
 
 let controls = new function() {
-    this.NumFish = 100;
-	this.FishRadius = 15;
+    this.NumFish = 1000;
+	this.FishRadius = 30;
     this.Go = update2;
 }
 
@@ -174,7 +174,7 @@ function GetCloseFishes(child){
 function Cohesion(nearFishes,x,y,z){
 	let n = nearFishes.length;
 	if (n == 0){
-		return [getRandomFloat(x-10,x+10),getRandomFloat(y-10,y+10),getRandomFloat(z-10,z+10)];
+		return [getRandomFloat(x-1,x+1),getRandomFloat(y-1,y+1),getRandomFloat(z-1,z+1)];
 	}
 	let avgX = x;
 	let avgY = y;
@@ -189,6 +189,34 @@ function Cohesion(nearFishes,x,y,z){
 		}*/
 	}
 	return [avgX/n, avgY/n, avgZ/n];
+}
+function IsClear(nearFishes,x,y,z){
+	let n = nearFishes.length;
+	//if (t==0)
+	//console.log("new 100 < "+Math.abs(x) + " x = " + x);
+	if (100 < Math.abs(x)){
+		return false;
+	}
+	if (100 < Math.abs(y)){
+		return false;
+	}
+	if (100 < Math.abs(z)){
+		return false;
+	}
+	//console.log("passed");
+	for (let i = 0; i < n; i++) {
+		let d = getDistance(nearFishes[i],x,y,z);
+		/*if (t==0){
+			console.log("d = " + d);
+		}*/
+		if (d < 2)
+			return false;
+	}
+	return true;
+}
+// if i = 0, then x+0, if i = 1, then x-3, if i = 2, then x+3
+function adaptFormula(x){
+	return 4.5*x*x-7.5*x;
 }
 function separate(nearFishes,x,y,z, x0, y0, z0){
 	let n = nearFishes.length;
@@ -214,14 +242,39 @@ function separate(nearFishes,x,y,z, x0, y0, z0){
 			z = -200 - z;
 		}
 	}
-	for (let i = 0; i < n; i++) {
+	if (n > 0){
+		//console.log("n = " + n);
+		for (let i = 0; i < 3; i++){
+			for (let j = 0; j < 3; j++){
+				for (let k = 0;k < 3; k++){
+					//if (t==0)
+					//console.log("x = " + x + " adap = " + x+adaptFormula(x,i));
+					//if (IsClear(nearFishes,x+adaptFormula(x,i),y+adaptFormula(y,j),z+adaptFormula(z,k)))
+						if (IsClear(nearFishes,x+adaptFormula(i),y+adaptFormula(j),z+adaptFormula(k))){
+							//console.log("clear");
+							return [x+adaptFormula(i),y+adaptFormula(j),z+adaptFormula(k)];
+						}
+				}
+			}
+		}
+		//console.log("Not clear");
+		return [x0, y0, z0];
+	}
+	
+	
+	
+	/*for (let i = 0; i < n; i++) {
 		let d = getDistance(nearFishes[i],x,y,z);
 		if (t==0){
 			console.log("d = " + d);
 		}
-		if (d < 2)
-			return [getRandomFloat(x-(10+controls.FishRadius),x+(10+controls.FishRadius)),getRandomFloat(y-(10+controls.FishRadius),y+(10+controls.FishRadius)),getRandomFloat(z-(10+controls.FishRadius),z+(10+controls.FishRadius))];;
-	}
+		if (d < 2){
+			
+				x=+1;
+			else
+		}*/
+	//return [getRandomFloat(x-(1+controls.FishRadius),x+(1+controls.FishRadius)),getRandomFloat(y-(1+controls.FishRadius),y+(1+controls.FishRadius)),getRandomFloat(z-(1+controls.FishRadius),z+(1+controls.FishRadius))];;
+	//}
 	return [x, y, z];
 }
 function nextStep(child,x,y,z){
@@ -248,13 +301,13 @@ function update() {
 				console.log("child.position.x = " + child.position.x + " newPoint[0] = "+newPoints[0]+" npoints[0]: "+npoints[0] );
 				console.log("nearFishes.length = " + nearFishes.length);
 				
-				t=t+1;
+				//t=t+1;
 			}
 			child.position.x = newPoints[0];
 			child.position.y = newPoints[1];
 			child.position.z = newPoints[2];
 		}
-	//}t = t+1;
+	t = t+1;
 	}
 	/*let delta = clock.getDelta();
 	t += delta;

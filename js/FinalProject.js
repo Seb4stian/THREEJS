@@ -1,5 +1,5 @@
 /***********
- * HW 4 Question 2 - tori Animation
+ * Final Project Boid Simulation
  * Ed Castro-Puello
  * Feb 2024
  ***********/
@@ -47,12 +47,6 @@ function createScene() {
 	
 	scene.add(axes);
 
-	/*
-	let NumTorus = controls.NumTorus;
-    let BigRadius = controls.BigRadius;
-	let SmallRadius = controls.SmallRadius;
-    if (root)
-        scene.remove(root);*/
     root = createFish(controls.NumFish);
 	
     scene.add(root);
@@ -114,36 +108,9 @@ function init() {
 
     initGui();
 }
-/*
-function PiramideOnTorus(NumTorus, BigRadius, SmallRadius){
-	let root = new THREE.Object3D();
-	for (let i = 0; i < NumTorus; i++){
-		let innerColor = getRandomColor();
-		geom = new THREE.TorusGeometry(BigRadius-((BigRadius-SmallRadius)/NumTorus)*i, SmallRadius, 24, 36);
-		currentMat = new THREE.MeshLambertMaterial({color: innerColor, flatShading: true});
-		Torus = new THREE.Mesh(geom, currentMat);
-		Torus.rps = 0.5;
-		root.add(Torus);
-		root.rotation.x = Math.PI / 2;
-	}
-	geom = new THREE.SphereGeometry(SmallRadius, 24, 24);
-	let innerColor = getRandomColor();
-	currentMat = new THREE.MeshLambertMaterial({color: innerColor, flatShading: true});
-	Sphere = new THREE.Mesh(geom, currentMat);
-	Sphere.rps = 0.5;
-	//Sphere.position.z = -NumTorus;
-	root.add(Sphere);
-	root.rps = 0.05;
-	return root;
-}*/
+
 function update2() {
-	/*let NumTorus = controls.NumTorus;
-    let BigRadius = controls.BigRadius;
-	let SmallRadius = controls.SmallRadius;*/
-    //if (root)
-    //    scene.remove(root);
-    //root = PiramideOnTorus(NumTorus, BigRadius, SmallRadius);
-    //scene.add(root);
+
 	if (root)
         scene.remove(root);
     root = createFish(controls.NumFish);
@@ -173,8 +140,11 @@ function GetCloseFishes(child){
 
 function Cohesion(nearFishes,x,y,z){
 	let n = nearFishes.length;
-	if (n == 0){
-		return [getRandomFloat(x-1,x+1),getRandomFloat(y-1,y+1),getRandomFloat(z-1,z+1)];
+	//console.log("n = " + n);
+	if (n <= 5){
+		//console.log("t = "+t+" x = " + (100*Math.sin(t)) + " y = " + (100*Math.cos(t)));
+		//return [getRandomFloat(x-1,x+1),getRandomFloat(y-1,y+1),getRandomFloat(z-1,z+1)];
+		return [100*Math.sin(t),100*Math.cos(t),100*Math.cos(t)];
 	}
 	let avgX = x;
 	let avgY = y;
@@ -183,17 +153,11 @@ function Cohesion(nearFishes,x,y,z){
 		avgX = avgX + nearFishes[i].position.x;
 		avgY = avgY + nearFishes[i].position.y;
 		avgZ = avgZ + nearFishes[i].position.z;
-		/*if (t==0){
-		console.log("avgX = " + avgX);
-		t=t+1;
-		}*/
 	}
 	return [avgX/n, avgY/n, avgZ/n];
 }
 function IsClear(nearFishes,x,y,z){
 	let n = nearFishes.length;
-	//if (t==0)
-	//console.log("new 100 < "+Math.abs(x) + " x = " + x);
 	if (100 < Math.abs(x)){
 		return false;
 	}
@@ -203,12 +167,8 @@ function IsClear(nearFishes,x,y,z){
 	if (100 < Math.abs(z)){
 		return false;
 	}
-	//console.log("passed");
 	for (let i = 0; i < n; i++) {
 		let d = getDistance(nearFishes[i],x,y,z);
-		/*if (t==0){
-			console.log("d = " + d);
-		}*/
 		if (d < 2)
 			return false;
 	}
@@ -243,13 +203,9 @@ function separate(nearFishes,x,y,z, x0, y0, z0){
 		}
 	}
 	if (n > 0){
-		//console.log("n = " + n);
 		for (let i = 0; i < 3; i++){
 			for (let j = 0; j < 3; j++){
 				for (let k = 0;k < 3; k++){
-					//if (t==0)
-					//console.log("x = " + x + " adap = " + x+adaptFormula(x,i));
-					//if (IsClear(nearFishes,x+adaptFormula(x,i),y+adaptFormula(y,j),z+adaptFormula(z,k)))
 						if (IsClear(nearFishes,x+adaptFormula(i),y+adaptFormula(j),z+adaptFormula(k))){
 							//console.log("clear");
 							return [x+adaptFormula(i),y+adaptFormula(j),z+adaptFormula(k)];
@@ -257,24 +213,8 @@ function separate(nearFishes,x,y,z, x0, y0, z0){
 				}
 			}
 		}
-		//console.log("Not clear");
 		return [x0, y0, z0];
 	}
-	
-	
-	
-	/*for (let i = 0; i < n; i++) {
-		let d = getDistance(nearFishes[i],x,y,z);
-		if (t==0){
-			console.log("d = " + d);
-		}
-		if (d < 2){
-			
-				x=+1;
-			else
-		}*/
-	//return [getRandomFloat(x-(1+controls.FishRadius),x+(1+controls.FishRadius)),getRandomFloat(y-(1+controls.FishRadius),y+(1+controls.FishRadius)),getRandomFloat(z-(1+controls.FishRadius),z+(1+controls.FishRadius))];;
-	//}
 	return [x, y, z];
 }
 function nextStep(child,x,y,z){
@@ -288,7 +228,9 @@ function nextStep(child,x,y,z){
 function Align(){
 }
 function update() {
-	//if ( t == 0){
+	let delta = clock.getDelta();
+	t += delta;
+	t %= 360;
 	if (root){
 		let children = root.children;
 		for (let i = 0; i < children.length; i++) {
@@ -297,32 +239,12 @@ function update() {
 			let points = Cohesion(nearFishes,child.position.x, child.position.y, child.position.z);
 			let npoints = nextStep(child,points[0],points[1],points[2]);
 			let newPoints = separate(nearFishes,npoints[0],npoints[1],npoints[2], child.position.x, child.position.y, child.position.z);
-			if (t==0){
-				console.log("child.position.x = " + child.position.x + " newPoint[0] = "+newPoints[0]+" npoints[0]: "+npoints[0] );
-				console.log("nearFishes.length = " + nearFishes.length);
-				
-				//t=t+1;
-			}
+
 			child.position.x = newPoints[0];
 			child.position.y = newPoints[1];
 			child.position.z = newPoints[2];
 		}
-	t = t+1;
 	}
-	/*let delta = clock.getDelta();
-	t += delta;
-	t %= controls.NumTorus;
-	if (root){
-		let children = root.children;
-		for (let i = 0; i < children.length; i++) {
-			 let child = children[i];
-			 let deltaRevRadians = rpsToRadians(child.rps, delta);
-			 child.position.z = Math.sin(((i)/controls.NumTorus)*(2 * Math.PI)+t)*10;
-		}
-		let deltaRotRadians = rpsToRadians(root.rps, delta);
-		root.rotation.y += deltaRotRadians;
-		root.rotation.y %= 2 * Math.PI;
-    }*/
 }
 
 function initGui() {

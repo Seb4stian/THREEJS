@@ -52,7 +52,7 @@ function createScene() {
     scene.add(root);
 	
 }
-
+let rootAnterior = [];
 function createFish(n) {
 	let root1 = new THREE.Object3D();
 	let color = new THREE.Color('#ff3232');
@@ -62,10 +62,11 @@ function createFish(n) {
 	for (let i = 0; i < n; i++){
 		let geom = new THREE.CylinderGeometry(1, 0.2, 0.5, 3);
 		let mesh = new THREE.Mesh(geom, mat);
-		mesh.rps = 0.5;
+		mesh.rps = 0.020;
 		mesh.position.x = getRandomFloat(-100,100);
 		mesh.position.y = getRandomFloat(-100,100);
 		mesh.position.z = getRandomFloat(-100,100);
+		rootAnterior.push([getRandomFloat(-90,90),getRandomFloat(-90,90),getRandomFloat(-90,90)]);
 		root1.add(mesh);
 	}
 	return root1;
@@ -137,24 +138,24 @@ function GetCloseFishes(child){
     }
 	return nearFishes;
 }
-
 function Cohesion(nearFishes,x,y,z){
 	let n = nearFishes.length;
-	//console.log("n = " + n);
-	if (n <= 5){
-		//console.log("t = "+t+" x = " + (100*Math.sin(t)) + " y = " + (100*Math.cos(t)));
-		//return [getRandomFloat(x-1,x+1),getRandomFloat(y-1,y+1),getRandomFloat(z-1,z+1)];
-		return [100*Math.sin(t),100*Math.cos(t),100*Math.cos(t)];
+	if (n <= 0){
+		return [x,y,z];
+		//return [200*Math.sin(t),200*Math.cos(t),0*Math.cos(t)];
 	}
-	let avgX = x;
-	let avgY = y;
-	let avgZ = z;
+	let avgX = 0;
+	let avgY = 0;
+	let avgZ = 0;
 	for (let i = 0; i < n; i++) {
 		avgX = avgX + nearFishes[i].position.x;
 		avgY = avgY + nearFishes[i].position.y;
 		avgZ = avgZ + nearFishes[i].position.z;
 	}
-	return [avgX/n, avgY/n, avgZ/n];
+	avgX = avgX/n;
+	avgY = avgY/n;
+	avgZ = avgZ/n;
+	return [(avgX+x)/2, (avgY+y)/2, (avgZ+z)/2];
 }
 function IsClear(nearFishes,x,y,z){
 	let n = nearFishes.length;
@@ -207,7 +208,6 @@ function separate(nearFishes,x,y,z, x0, y0, z0){
 			for (let j = 0; j < 3; j++){
 				for (let k = 0;k < 3; k++){
 						if (IsClear(nearFishes,x+adaptFormula(i),y+adaptFormula(j),z+adaptFormula(k))){
-							//console.log("clear");
 							return [x+adaptFormula(i),y+adaptFormula(j),z+adaptFormula(k)];
 						}
 				}
@@ -217,15 +217,24 @@ function separate(nearFishes,x,y,z, x0, y0, z0){
 	}
 	return [x, y, z];
 }
-function nextStep(child,x,y,z){
+function nextStep(child,x,y,z,s){
 	
 	d = getDistance(child,x,y,z);
 	let X = x - child.position.x;
 	let Y = y - child.position.y;
 	let Z = z - child.position.z
-	return [child.position.x+X*(1/d), child.position.y+Y*(1/d), child.position.z+Z*(1/d)];
+	return [child.position.x+X*(s/d), child.position.y+Y*(s/d), child.position.z+Z*(s/d)];
 }
-function Align(){
+function nextStep2(child,x,y,z,s){
+	
+	d = getDistance(child,x,y,z);
+	let X = child.position.x - x;
+	let Y = child.position.y - y;
+	let Z = child.position.z - z;
+	return [child.position.x+X*(s/d), child.position.y+Y*(s/d), child.position.z+Z*(s/d)];
+}
+function Align(child,i){
+	return nextStep2(child,rootAnterior[i][0],rootAnterior[i][1],rootAnterior[i][2],1);
 }
 function update() {
 	let delta = clock.getDelta();
@@ -235,11 +244,18 @@ function update() {
 		let children = root.children;
 		for (let i = 0; i < children.length; i++) {
 			let child = children[i];
+			
 			nearFishes = GetCloseFishes(child);
-			let points = Cohesion(nearFishes,child.position.x, child.position.y, child.position.z);
-			let npoints = nextStep(child,points[0],points[1],points[2]);
+			let p1 = Align(child,i);
+			let points = Cohesion(nearFishes,p1[0], p1[1], p1[2]);
+			let npoints = nextStep(child,points[0],points[1],points[2],1);
 			let newPoints = separate(nearFishes,npoints[0],npoints[1],npoints[2], child.position.x, child.position.y, child.position.z);
-
+			
+			
+			rootAnterior[i][0] = child.position.x;
+			rootAnterior[i][1] = child.position.y;
+			rootAnterior[i][2] = child.position.z;
+			
 			child.position.x = newPoints[0];
 			child.position.y = newPoints[1];
 			child.position.z = newPoints[2];
@@ -250,7 +266,7 @@ function update() {
 function initGui() {
 
 	let gui = new dat.GUI();
-    gui.add(controls, 'NumFish', 100, 2000).step(100).name('Num. Fish');
+    gui.add(controls, 'NumFish', 1, 2000).step(1).name('Num. Fish');
 	gui.add(controls, 'FishRadius', 5, 85).step(5).name('Fish Radius');
     gui.add(controls, 'Go');
 }
